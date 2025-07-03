@@ -1,0 +1,41 @@
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: modelcar-image-build
+spec:
+  runPolicy: Serial
+
+  source:
+    git:
+      uri: "https://github.com/Anusha2605/modelcar-catalog.git"
+      ref: "main"
+    contextDir: "modelcar-images/qwen2.5-32b-instruct-awq"
+  
+  strategy:
+    type: Docker
+    dockerStrategy:
+      buildArgs:
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+              key: HF_TOKEN
+              name: huggingface-secret
+      dockerfilePath: Containerfile
+
+  output:
+    pushSecret:
+      name: quay-creds
+    to:
+      kind: "DockerImage"
+      name: "quay.io/rh_ee_asathish/modelcar:qwen2.5-32b-instruct-awq:v1.0.0"
+
+  resources:
+    requests:
+      cpu: 2
+      memory: 10Gi
+      ephemeral-storage: 15Gi
+    limits:
+      cpu: 2
+      memory: 25Gi
+      ephemeral-storage: 35Gi
